@@ -61,24 +61,16 @@ build_and_push linux/386 "i386-${VER}"
 build_and_push linux/arm/v6 "armhf-${VER}"
 build_and_push linux/arm64/v8 "arm64v8-${VER}"
 
-docker manifest create "${REGISTRY}:${VER}" \
+docker buildx imagetools create \
+  -t "${REGISTRY}:${VER}" \
   "${REGISTRY}:amd64-${VER}" \
   "${REGISTRY}:i386-${VER}" \
   "${REGISTRY}:armhf-${VER}" \
   "${REGISTRY}:arm64v8-${VER}"
 
-docker manifest annotate "${REGISTRY}:${VER}" "${REGISTRY}:i386-${VER}" --os linux --arch 386
-docker manifest annotate "${REGISTRY}:${VER}" "${REGISTRY}:armhf-${VER}" --os linux --arch arm
-docker manifest annotate "${REGISTRY}:${VER}" "${REGISTRY}:arm64v8-${VER}" --os linux --arch arm64 --variant v8
-docker manifest push "${REGISTRY}:${VER}"
-
-docker manifest create "${REGISTRY}:latest" \
+docker buildx imagetools create \
+  -t "${REGISTRY}:latest" \
   "${REGISTRY}:amd64-${VER}" \
   "${REGISTRY}:i386-${VER}" \
   "${REGISTRY}:armhf-${VER}" \
   "${REGISTRY}:arm64v8-${VER}"
-
-docker manifest annotate "${REGISTRY}:latest" "${REGISTRY}:i386-${VER}" --os linux --arch 386
-docker manifest annotate "${REGISTRY}:latest" "${REGISTRY}:armhf-${VER}" --os linux --arch arm
-docker manifest annotate "${REGISTRY}:latest" "${REGISTRY}:arm64v8-${VER}" --os linux --arch arm64 --variant v8
-docker manifest push "${REGISTRY}:latest"
