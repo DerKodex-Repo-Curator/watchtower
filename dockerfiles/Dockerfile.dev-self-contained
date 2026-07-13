@@ -25,7 +25,7 @@ COPY . /watchtower
 RUN \
   cd /watchtower && \
   \
-  GO111MODULE=on CGO_ENABLED=0 GOOS=linux go build -a -ldflags "-extldflags '-static' -X github.com/DerKodex-Repo-Curator/watchtower/internal/meta.Version=${WATCHTOWER_VERSION}" . && \
+  GO111MODULE=on CGO_ENABLED=0 GOOS=linux go build -a -o /tmp/watchtower -ldflags "-extldflags '-static' -X github.com/DerKodex-Repo-Curator/watchtower/internal/meta.Version=${WATCHTOWER_VERSION}" . && \
   GO111MODULE=on go test ./... -v
 
 
@@ -40,7 +40,7 @@ LABEL "com.centurylinklabs.watchtower"="true"
 # copy files from other container
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
-COPY --from=builder /watchtower/watchtower /watchtower
+COPY --from=builder /tmp/watchtower /watchtower
 
 HEALTHCHECK CMD [ "/watchtower", "--health-check"]
 
