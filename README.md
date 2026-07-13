@@ -39,6 +39,37 @@ $ docker run --detach \
 
 Watchtower is intended to be used in homelabs, media centers, local dev environments, and similar. We do **not** recommend using Watchtower in a commercial or production environment. If that is you, you should be looking into using Kubernetes. If that feels like too big a step for you, please look into solutions like [MicroK8s](https://microk8s.io/) and [k3s](https://k3s.io/) that take away a lot of the toil of running a Kubernetes cluster. 
 
+## Local multiarch build and push
+
+If you want to build the fork locally and publish multi-architecture images to your own registry, use the repository script:
+
+```bash
+./scripts/build-and-push-multiarch.sh v1.0.0 registry.xaas.ar/watchtower
+```
+
+### Before running the script
+
+1. Log in to the registry:
+   ```bash
+   docker login registry.xaas.ar
+   ```
+2. Make sure the builder can run all required platforms:
+   ```bash
+   docker buildx inspect --bootstrap
+   docker buildx ls
+   ```
+
+### If arm support is missing
+
+If `docker buildx ls` only shows `linux/amd64` and `linux/386`, install the emulators once on the host:
+
+```bash
+docker run --privileged --rm tonistiigi/binfmt --install arm,arm64
+docker buildx inspect --bootstrap
+```
+
+The script does **not** install `binfmt` automatically. That keeps the build from changing the host unexpectedly and avoids requiring elevated privileges on every run.
+
 ## Documentation
 The full documentation is available at https://containrrr.dev/watchtower.
 
