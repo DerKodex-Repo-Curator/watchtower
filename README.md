@@ -47,6 +47,8 @@ If you want to build the fork locally and publish multi-architecture images to y
 ./scripts/build-and-push-multiarch.sh v1.0.0 registry.xaas.ar/watchtower
 ```
 
+This path uses `dockerfiles/Dockerfile.dev-self-contained`, so the Go build runs inside Docker. You do **not** need a local Go toolchain on the host.
+
 ### Before running the script
 
 1. Log in to the registry:
