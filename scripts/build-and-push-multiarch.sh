@@ -53,7 +53,7 @@ build_and_push() {
 
   rm -f "$BIN"
   env GOOS="$goos" GOARCH="$goarch" CGO_ENABLED=0 $extra_goenv \
-    go build -ldflags "-s -w -X github.com/containrrr/watchtower/internal/meta.Version=${TAG}" \
+    go build -ldflags "-s -w -X github.com/DerKodex-Repo-Curator/watchtower/internal/meta.Version=${TAG}" \
     -o "$BIN" .
 
   docker buildx build \

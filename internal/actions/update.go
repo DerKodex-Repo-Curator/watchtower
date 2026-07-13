@@ -3,12 +3,12 @@ package actions
 import (
 	"errors"
 
-	"github.com/containrrr/watchtower/internal/util"
-	"github.com/containrrr/watchtower/pkg/container"
-	"github.com/containrrr/watchtower/pkg/lifecycle"
-	"github.com/containrrr/watchtower/pkg/session"
-	"github.com/containrrr/watchtower/pkg/sorter"
-	"github.com/containrrr/watchtower/pkg/types"
+	"github.com/DerKodex-Repo-Curator/watchtower/internal/util"
+	"github.com/DerKodex-Repo-Curator/watchtower/pkg/container"
+	"github.com/DerKodex-Repo-Curator/watchtower/pkg/lifecycle"
+	"github.com/DerKodex-Repo-Curator/watchtower/pkg/session"
+	"github.com/DerKodex-Repo-Curator/watchtower/pkg/sorter"
+	"github.com/DerKodex-Repo-Curator/watchtower/pkg/types"
 	log "github.com/sirupsen/logrus"
 )
 
