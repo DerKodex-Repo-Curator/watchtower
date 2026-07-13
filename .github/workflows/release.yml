@@ -67,17 +67,12 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: 1.20.x
-      - name: Login to Docker Hub
+      - name: Login to registry.xaas.ar
         uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc #v2
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Login to GHCR
-        uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc #v2
-        with:
-          username: ${{ secrets.BOT_USERNAME }}
-          password: ${{ secrets.BOT_GHCR_PAT }}
-          registry: ghcr.io
+          registry: registry.xaas.ar
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_TOKEN }}
       - name: Build
         uses: goreleaser/goreleaser-action@7ec5c2b0c6cdda6e8bbb49444bc797dd33d74dd8 #v3
         with:
@@ -91,97 +86,70 @@ jobs:
           echo '{"experimental": "enabled"}' > ~/.docker/config.json
       - name: Create manifest for version
         run: |
-          export DH_TAG=$(git tag --points-at HEAD | sed 's/^v*//')
+          export IMAGE_REPO=registry.xaas.ar/watchtower
+          export DH_TAG=$(echo "$TAG" | sed 's/^v*//')
           docker manifest create \
-            containrrr/watchtower:$DH_TAG \
-            containrrr/watchtower:amd64-$DH_TAG \
-            containrrr/watchtower:i386-$DH_TAG \
-            containrrr/watchtower:armhf-$DH_TAG \
-            containrrr/watchtower:arm64v8-$DH_TAG
-          docker manifest create \
-            ghcr.io/containrrr/watchtower:$DH_TAG \
-            ghcr.io/containrrr/watchtower:amd64-$DH_TAG \
-            ghcr.io/containrrr/watchtower:i386-$DH_TAG \
-            ghcr.io/containrrr/watchtower:armhf-$DH_TAG \
-            ghcr.io/containrrr/watchtower:arm64v8-$DH_TAG
+            ${IMAGE_REPO}:$DH_TAG \
+            ${IMAGE_REPO}:amd64-$DH_TAG \
+            ${IMAGE_REPO}:i386-$DH_TAG \
+            ${IMAGE_REPO}:armhf-$DH_TAG \
+            ${IMAGE_REPO}:arm64v8-$DH_TAG
       - name: Annotate manifest for version
         run: |
-          for REPO in '' ghcr.io/ ; do
-          
+          export IMAGE_REPO=registry.xaas.ar/watchtower
+          export TAG=${{ github.ref_name }}
           docker manifest annotate \
-            ${REPO}containrrr/watchtower:$(echo $TAG | sed 's/^v*//') \
-            ${REPO}containrrr/watchtower:i386-$(echo $TAG | sed 's/^v*//') \
+            ${IMAGE_REPO}:$(echo $TAG | sed 's/^v*//') \
+            ${IMAGE_REPO}:i386-$(echo $TAG | sed 's/^v*//') \
             --os linux \
             --arch 386
-          
           docker manifest annotate \
-            ${REPO}containrrr/watchtower:$(echo $TAG | sed 's/^v*//') \
-            ${REPO}containrrr/watchtower:armhf-$(echo $TAG | sed 's/^v*//') \
+            ${IMAGE_REPO}:$(echo $TAG | sed 's/^v*//') \
+            ${IMAGE_REPO}:armhf-$(echo $TAG | sed 's/^v*//') \
             --os linux \
             --arch arm
-      
           docker manifest annotate \
-            ${REPO}containrrr/watchtower:$(echo $TAG | sed 's/^v*//') \
-            ${REPO}containrrr/watchtower:arm64v8-$(echo $TAG | sed 's/^v*//') \
+            ${IMAGE_REPO}:$(echo $TAG | sed 's/^v*//') \
+            ${IMAGE_REPO}:arm64v8-$(echo $TAG | sed 's/^v*//') \
             --os linux \
             --arch arm64 \
             --variant v8
-            
-            done
       - name: Create manifest for latest
         run: |
+          export IMAGE_REPO=registry.xaas.ar/watchtower
           docker manifest create \
-            containrrr/watchtower:latest \
-            containrrr/watchtower:amd64-latest \
-            containrrr/watchtower:i386-latest \
-            containrrr/watchtower:armhf-latest \
-            containrrr/watchtower:arm64v8-latest
-          docker manifest create \
-            ghcr.io/containrrr/watchtower:latest \
-            ghcr.io/containrrr/watchtower:amd64-latest \
-            ghcr.io/containrrr/watchtower:i386-latest \
-            ghcr.io/containrrr/watchtower:armhf-latest \
-            ghcr.io/containrrr/watchtower:arm64v8-latest
+            ${IMAGE_REPO}:latest \
+            ${IMAGE_REPO}:amd64-latest \
+            ${IMAGE_REPO}:i386-latest \
+            ${IMAGE_REPO}:armhf-latest \
+            ${IMAGE_REPO}:arm64v8-latest
       - name: Annotate manifest for latest
         run: |
-          for REPO in '' ghcr.io/ ; do
-
+          export IMAGE_REPO=registry.xaas.ar/watchtower
           docker manifest annotate \
-            ${REPO}containrrr/watchtower:latest \
-            ${REPO}containrrr/watchtower:i386-latest \
+            ${IMAGE_REPO}:latest \
+            ${IMAGE_REPO}:i386-latest \
             --os linux \
             --arch 386
-      
           docker manifest annotate \
-            ${REPO}containrrr/watchtower:latest \
-            ${REPO}containrrr/watchtower:armhf-latest \
+            ${IMAGE_REPO}:latest \
+            ${IMAGE_REPO}:armhf-latest \
             --os linux \
             --arch arm
-            
           docker manifest annotate \
-            ${REPO}containrrr/watchtower:latest \
-            ${REPO}containrrr/watchtower:arm64v8-latest \
+            ${IMAGE_REPO}:latest \
+            ${IMAGE_REPO}:arm64v8-latest \
             --os linux \
             --arch arm64 \
             --variant v8
-
-          done
-      - name: Push manifests to Dockerhub
+      - name: Push manifests to registry.xaas.ar
         env:
-          DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKER_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          DOCKER_USER: ${{ secrets.REGISTRY_USERNAME }}
+          DOCKER_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
         run: |
-          docker login -u $DOCKER_USER -p $DOCKER_TOKEN && \
-            docker manifest push containrrr/watchtower:$(echo $TAG | sed 's/^v*//') && \
-            docker manifest push containrrr/watchtower:latest
-      - name: Push manifests to GitHub Container Registry
-        env:
-          DOCKER_USER: ${{ secrets.BOT_USERNAME }}
-          DOCKER_TOKEN: ${{ secrets.BOT_GHCR_PAT }}
-        run: |
-          docker login -u $DOCKER_USER -p $DOCKER_TOKEN ghcr.io && \
-            docker manifest push ghcr.io/containrrr/watchtower:$(echo $TAG | sed 's/^v*//') && \
-            docker manifest push ghcr.io/containrrr/watchtower:latest
+          docker login -u $DOCKER_USER -p $DOCKER_TOKEN registry.xaas.ar && \
+            docker manifest push registry.xaas.ar/watchtower:$(echo $TAG | sed 's/^v*//') && \
+            docker manifest push registry.xaas.ar/watchtower:latest
 
   renew-docs:
     name: Refresh pkg.go.dev
